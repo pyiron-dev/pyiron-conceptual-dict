@@ -10,12 +10,30 @@ import ast
 
 def process_job(job):
     method_dict = {}
-    get_structures(job, method_dict)
+    add_contexts(method_dict)
+    #get_structures(job, method_dict)
     identify_method(job, method_dict)
     extract_calculated_quantities(job, method_dict)
     add_software(method_dict)
     get_simulation_folder(job, method_dict)
     return method_dict
+
+def add_contexts(method_dict):
+    method_dict['@context'] = {}
+    method_dict['@context']['sample'] = 'http://purls.helmholtz-metadaten.de/cmso/AtomicScaleSample'
+    method_dict['@context']['path'] = 'http://purls.helmholtz-metadaten.de/cmso/hasPath'
+    method_dict['@context']['dof'] = 'http://purls.helmholtz-metadaten.de/asmo/hasRelaxationDOF'
+    method_dict['@context']['inputs'] = 'http://purls.helmholtz-metadaten.de/asmo/hasInputParameter'
+    method_dict['@context']['label'] = 'http://www.w3.org/2000/01/rdf-schema#label'
+    method_dict['@context']['unit'] = 'http://purls.helmholtz-metadaten.de/asmo/hasUnit'
+    method_dict['@context']['value'] = 'http://purls.helmholtz-metadaten.de/asmo/hasValue'
+    method_dict['@context']['outputs'] = 'http://purls.helmholtz-metadaten.de/cmso/hasCalculatedProperty'
+    #method_dict['@context']['workflow_manager'] = ''
+    #method_dict['@context']['software'] = ''
+    method_dict['@context']['molecular_dynamics'] = 'http://purls.helmholtz-metadaten.de/asmo/MolecularDynamics'
+    method_dict['@context']['molecular_statics'] = 'http://purls.helmholtz-metadaten.de/asmo/MolecularStatics'
+    method_dict['@context']['ensemble'] = 'http://purls.helmholtz-metadaten.de/asmo/hasStatisticalEnsemble'
+
 
 def get_simulation_folder(job, method_dict):
     method_dict['path'] = os.path.join(job.project.path, f'{job.name}_hdf5')
@@ -42,52 +60,61 @@ def identify_method(job, method_dict):
     ensemble = None
 
     if "min_style" in input_dict.keys():
-        dof.append("AtomicPositionRelaxation")
-        dof.append("CellVolumeRelaxation")
-        md_method = "MolecularStatics"
+        dof.append("http://purls.helmholtz-metadaten.de/asmo/AtomicPositionRelaxation")
+        dof.append("http://purls.helmholtz-metadaten.de/asmo/CellVolumeRelaxation")
+        md_method = "molecular_statics"
 
     elif "nve" in input_dict["fix___ensemble"]:
         if int(input_dict["run"]) == 0:
             method = "static"
-            md_method = "MolecularStatics"
-            ensemble = "MicrocanonicalEnsemble"
+            md_method = "molecular_statics"
+            ensemble = "http://purls.helmholtz-metadaten.de/asmo/MicrocanonicalEnsemble"
 
         elif int(input_dict["run"]) > 0:
             method = "md_nve"
-            dof.append("AtomicPositionRelaxation")
-            md_method = "MolecularDynamics"
-            ensemble = "MicrocanonicalEnsemble"
+            dof.append("http://purls.helmholtz-metadaten.de/asmo/AtomicPositionRelaxation")
+            md_method = "molecular_dynamics"
+            ensemble = "http://purls.helmholtz-metadaten.de/asmo/MicrocanonicalEnsemble"
 
     elif "nvt" in input_dict["fix___ensemble"]:
         method = "md_nvt"
         raw = input_dict["fix___ensemble"].split()
         temp = float(raw[3])
-        dof.append("AtomicPositionRelaxation")
-        md_method = "MolecularDynamics"
-        ensemble = "CanonicalEnsemble"
+        dof.append("http://purls.helmholtz-metadaten.de/asmo/AtomicPositionRelaxation")
+        md_method = "molecular_dynamics"
+        ensemble = "http://purls.helmholtz-metadaten.de/asmo/CanonicalEnsemble"
 
     elif "npt" in input_dict["fix___ensemble"]:
-        dof.append("AtomicPositionRelaxation")
-        dof.append("CellVolumeRelaxation")
+        dof.append("http://purls.helmholtz-metadaten.de/asmo/AtomicPositionRelaxation")
+        dof.append("http://purls.helmholtz-metadaten.de/asmo/CellVolumeRelaxation")
         if "aniso" in input_dict["fix___ensemble"]:
             method = "md_npt_aniso"
-            dof.append("CellShapeRelaxation")
+            dof.append("http://purls.helmholtz-metadaten.de/asmo/CellShapeRelaxation")
         else:
             method = "md_npt_iso"
-        md_method = "MolecularDynamics"
+        md_method = "molecular_dynamics"
         raw = input_dict["fix___ensemble"].split()
         temp = float(raw[3])
         press = float(raw[7])
-        ensemble = "IsothermalIsobaricEnsemble"
+        ensemble = "http://purls.helmholtz-metadaten.de/asmo/IsothermalIsobaricEnsemble"
 
     method_dict[md_method] = {}
-    method_dict[md_method]["temperature"] = {}
-    method_dict[md_method]["temperature"]["value"] = temp
-    method_dict[md_method]["temperature"]["unit"] = "K"
 
-    method_dict[md_method]["pressure"] = {}
-    method_dict[md_method]["pressure"]["value"] = press
-    method_dict[md_method]["pressure"]["unit"] = "GigaPA"
+    method_dict[md_method]['inputs'] = []
+
+    temperature = {}
+    temperature["value"] = temp
+    temperature["unit"] = "K"
+    temperature["label"] = "temperature"
+
+    method_dict[md_method]['inputs'].append(temperature)
+
+    pressure = {}
+    pressure["value"] = press
+    pressure["unit"] = "GigaPA"
+    pressure["label"] = "pressure"
+
+    method_dict[md_method]['inputs'].append(pressure)
 
     method_dict[md_method]["ensemble"] = ensemble
     
@@ -104,22 +131,31 @@ def identify_method(job, method_dict):
     if "url" in potdict[list(potdict.keys())[0]].keys():
         url = potdict[list(potdict.keys())[0]]["url"]
 
+    if 'meam' in ps:
+        method_dict['@context']['potential'] = "http://purls.helmholtz-metadaten.de/asmo/ModifiedEmbeddedAtomModel"
+    elif 'eam' in ps:
+        method_dict['@context']['potential'] = "http://purls.helmholtz-metadaten.de/asmo/EmbeddedAtomModel"
+    elif 'lj' in ps:
+        method_dict['@context']['potential'] = "http://purls.helmholtz-metadaten.de/asmo/LennardJonesPotential"
+    elif 'ace' in ps:
+        method_dict['@context']['potential'] = "http://purls.helmholtz-metadaten.de/asmo/MachineLearningPotential"
+    else:
+        method_dict['@context']['potential'] = "http://purls.helmholtz-metadaten.de/asmo/InteratomicPotential"
+
+
     method_dict[md_method]["potential"] = {}
-    method_dict[md_method]["potential"]["type"] = ps
     method_dict[md_method]["potential"]["label"] = name
     if url is not None:
-        method_dict[md_method]["potential"]["uri"] = url
-    else:
-        method_dict[md_method]["potential"]["uri"] = name
+        method_dict[md_method]["potential"]["@id"] = url
 
 def add_software(method_dict):
     method_dict["workflow_manager"] = {}
-    method_dict["workflow_manager"]["uri"] = "http://demo.fiz-karlsruhe.de/matwerk/E457491"
+    method_dict["workflow_manager"]["@id"] = "http://demo.fiz-karlsruhe.de/matwerk/E457491"
     method_dict["workflow_manager"]["label"] = "pyiron"
     # and finally code details
 
     software = {
-        "uri": "http://demo.fiz-karlsruhe.de/matwerk/E447986",
+        "@id": "http://demo.fiz-karlsruhe.de/matwerk/E447986",
         "label": "LAMMPS",
     }
     method_dict["software"] = [software]
@@ -147,7 +183,6 @@ def extract_calculated_quantities(job, method_dict):
             "label": "TotalEnergy",
             "value": np.round(aen, decimals=4),
             "unit": "EV",
-            "associate_to_sample": True,
         }
     )
     outputs.append(
@@ -155,7 +190,6 @@ def extract_calculated_quantities(job, method_dict):
             "label": "TotalVolume",
             "value": np.round(avol, decimals=4),
             "unit": "ANGSTROM3",
-            "associate_to_sample": True,
         }
     )
     method_dict['outputs'] =  outputs
