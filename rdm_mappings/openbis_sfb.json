@@ -1,0 +1,10 @@
+{
+    "Lammps":
+        {
+            "object_type": "SIMULATION_EXP",
+
+            "job_starttime": {"openbis_name": "START_DATE"},
+            "SIMULATION_TYPE": {"openbis_name": "SIMULATION_TYPE", "value": "ATOM"},
+            "ATOMSIM_TYPE": {"openbis_name": "ATOMSIM_TYPE", "value": "ATOM_MD"}
+        }
+}
