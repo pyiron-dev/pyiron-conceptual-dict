@@ -1,6 +1,7 @@
 {
     "openbis": {
             "sandbox": {"url": "https://130.183.217.194", "username": "xx", "mapping": "openbis_sandbox.json"},
-            "SFB": {"url": "https://openbis.imm.rwth-aachen.de/openbis/webapp/eln-lims/", "username": "xx", "mapping": "openbis_sfb.json"}
+            "SFB": {"url": "https://openbis.imm.rwth-aachen.de/openbis/webapp/eln-lims/", "username": "xx", "mapping": "openbis_sfb.json",
+                    "dataset_type": "PYIRON_HDF5"}
     }
 }

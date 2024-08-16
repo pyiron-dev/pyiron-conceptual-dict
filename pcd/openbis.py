@@ -22,6 +22,10 @@ class OpenBIS:
             try:
                 self.url = ob[instance]['url']
                 self.username = ob[instance]['username']
+                try:
+                    self.dataset_type = ob[instance]['dataset_type']
+                except KeyError:
+                    self.dataset_type = 'RAW_DATA'
                 mapping_f = 'rdm_mappings/' + ob[instance]['mapping']
                 with open(mapping_f) as m:
                     self.mapping = json.load(m) #TODO add checks for file existence, resulting dicttype
@@ -67,11 +71,17 @@ class OpenBIS:
         if self.instance == 'sandbox':
             cdict_used = {i['label']: i['value'] for i in cdict['molecular_dynamics']['inputs']} | {i['label']: i['value'] for i in cdict['outputs']}
         if self.instance == 'SFB':
-            cdict_used = {'ATOMSIM_TYPE': 'ATOM-MD', 'SIMULATION_TYPE': 'ATOM'} | {'job_starttime': cdict['job_starttime']}
+            inout_dict = {i['label']: i['value'] for i in cdict['molecular_dynamics']['inputs']} | {i['label']: i['value'] for i in cdict['outputs']}
+            tech_list = ['dummy_bool', 'queue_id', 'job_starttime', 'job_stoptime', 'job_status']
+            tech_dict = {k:v for k, v in cdict.items() if k in tech_list}
+            cdict_used = inout_dict | tech_dict
         
         for k, v in cdict_used.items():
             if k in m.keys():
-                ob_dict[m[k]['openbis_name'].lower()] = v
+                if 'terms' in m[k].keys():
+                    ob_dict[m[k]['openbis_code'].lower()] = m[k]['terms'][v]
+                else:
+                    ob_dict[m[k]['openbis_code'].lower()] = v
     
         return ob_dict
 

@@ -2,11 +2,11 @@
     "Lammps":
         {
             "object_type": "pyiron_lammps_job",
-            "prop_pyiron": {"openbis_name": 0, "unit": 1, "id": 2},
+            "prop_pyiron": {"openbis_code": 0, "unit": 1, "id": 2},
 
-            "temperature": {"openbis_name": "PROP_TEMPERATURE", "unit": "K"},
-            "TotalVolume": {"openbis_name": "PROP_VOLUME", "unit": "ANGSTROM3"},
-            "pressure": {"openbis_name": "PROP_PRESSURE", "unit": "GigaPA"},
-            "TotalEnergy": {"openbis_name": "PROP_TOTALENERGY", "unit": "EV"}
+            "temperature": {"openbis_code": "PROP_TEMPERATURE", "unit": "K"},
+            "TotalVolume": {"openbis_code": "PROP_VOLUME", "unit": "ANGSTROM3"},
+            "pressure": {"openbis_code": "PROP_PRESSURE", "unit": "GigaPA"},
+            "TotalEnergy": {"openbis_code": "PROP_TOTALENERGY", "unit": "EV"}
         }
 }

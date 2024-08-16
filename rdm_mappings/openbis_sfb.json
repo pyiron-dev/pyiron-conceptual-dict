@@ -1,10 +1,18 @@
 {
     "Lammps":
         {
-            "object_type": "SIMULATION_EXP",
+            "object_type": "TEMP_PYIRON_LAMMPS",
 
-            "job_starttime": {"openbis_name": "START_DATE"},
-            "SIMULATION_TYPE": {"openbis_name": "SIMULATION_TYPE", "value": "ATOM"},
-            "ATOMSIM_TYPE": {"openbis_name": "ATOMSIM_TYPE", "value": "ATOM_MD"}
+            "dummy_bool": {"openbis_code": "TEMP_CONVERGED", "terms": {"Dummy value for 1": "True", "Dummy value for 0": "False"}},
+            "queue_id": {"openbis_code": "CLUSTER_JOBID"},
+            "job_starttime": {"openbis_code": "TEMP_JOB_START_DATE"},
+            "job_stoptime": {"openbis_code": "TEMP_JOB_END_DATE"},
+            "job_status": {"openbis_code": "TEMP_STATUS", "terms": 
+                            {"aborted": "ABORTED", "created": "CREATED", "finished": "FINISHED", 
+                            "initialized": "INITIALIZED", "running": "RUNNING", "submitted": "SUBMITTED"}},
+            "temperature": {"openbis_code": "TEMP_TEMPERATURE", "unit": "K"},
+            "TotalVolume": {"openbis_code": "TEMP_TOTAL_VOLUME", "unit": "ANGSTROM3"},
+            "pressure": {"openbis_code": "TEMP_PRESSURE", "unit": "GigaPA"},
+            "TotalEnergy": {"openbis_code": "TEMP_TOTAL_ENERGY", "unit": "EV"}
         }
 }
