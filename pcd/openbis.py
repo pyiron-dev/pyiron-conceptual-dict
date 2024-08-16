@@ -60,7 +60,7 @@ class OpenBIS:
             self.get_project('project')                                      # TODO: reasonable default/take first - self.space.get_projects()[0] / else
 
         self.collection = self.o.get_collections(openbis_collection, project=self.project.code)[0]
-        if not self.collection:                                              # Probably default collection name to pyiron project name?
+        if not self.collection:                                              # Now defaults collection name to pyiron project name
             self.collection = self.o.new_collection(code=openbis_collection, type=coll_type, project=self.project.code)
             self.collection.save()
         
@@ -85,7 +85,7 @@ class OpenBIS:
     
         return ob_dict
 
-    def upload_job(self, cdict, openbis_project=None, openbis_collection=None): # mapping will not be here, read from file
+    def upload_job(self, cdict, openbis_project=None, openbis_collection=None):
         if openbis_project:
             self.get_project(openbis_project)
         if openbis_collection:
@@ -106,8 +106,7 @@ class OpenBIS:
             obj.save()
     
             path_to_h5 = cdict['project_name'] + '/' + str(cdict['job_name']) + '.h5'    # Could use PATH from cdict but need relative...
-            dataset = self.o.new_dataset(type='RAW_DATA', collection=self.collection, object=obj, files=[path_to_h5], props={'$name':cdict['job_name']+'.h5'}) 
-                                    # customise dataset type
+            dataset = self.o.new_dataset(type=self.dataset_type, collection=self.collection, object=obj, files=[path_to_h5], props={'$name':cdict['job_name']+'.h5'})
             dataset.save()
 
     # ----------------------------------------------------------------------------------------------------------------------------------------
