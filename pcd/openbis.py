@@ -63,18 +63,30 @@ class OpenBIS:
         if not self.collection:                                              # Now defaults collection name to pyiron project name
             self.collection = self.o.new_collection(code=openbis_collection, type=coll_type, project=self.project.code)
             self.collection.save()
+
+    def flatten_cdict(self, cdict):
+        flat = {}
+        for k, v in cdict.items():
+            if k != '@context':
+                if isinstance(v, dict):
+                    if 'label' in v.keys():
+                        flat[k] = v['label']
+                    else:
+                        flat = flat | self.flatten_cdict(v)
+                elif k == 'inputs' or k == 'outputs':
+                    for i in v:
+                        flat[i['label']] = i['value']
+                elif k == 'software':
+                    flat[k] = v[0]['label']
+                else:
+                    flat[k] = v
+        return flat
         
     def map_cdict(self, cdict):
-        m = self.mapping[cdict['job_type']]
+        m = self.mapping[cdict['job_type']] # TODO also use flattened?
         ob_dict = {}
 
-        if self.instance == 'sandbox':
-            cdict_used = {i['label']: i['value'] for i in cdict['molecular_dynamics']['inputs']} | {i['label']: i['value'] for i in cdict['outputs']}
-        if self.instance == 'SFB':
-            inout_dict = {i['label']: i['value'] for i in cdict['molecular_dynamics']['inputs']} | {i['label']: i['value'] for i in cdict['outputs']}
-            tech_list = ['dummy_bool', 'queue_id', 'job_starttime', 'job_stoptime', 'job_status']
-            tech_dict = {k:v for k, v in cdict.items() if k in tech_list}
-            cdict_used = inout_dict | tech_dict
+        cdict_used = self.flatten_cdict(cdict)
         
         for k, v in cdict_used.items():
             if k in m.keys():
