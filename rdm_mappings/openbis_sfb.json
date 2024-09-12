@@ -14,5 +14,23 @@
             "TotalVolume": {"openbis_code": "TEMP_TOTAL_VOLUME", "unit": "ANGSTROM3"},
             "pressure": {"openbis_code": "TEMP_PRESSURE", "unit": "GigaPA"},
             "TotalEnergy": {"openbis_code": "TEMP_TOTAL_ENERGY", "unit": "EV"}
+        },
+    
+    "Vasp":
+        {
+            "object_type": "TEMP_PYIRON_VASP",
+
+            "dummy_bool": {"openbis_code": "TEMP_CONVERGED", "terms": {"Dummy value for 1": "True", "Dummy value for 0": "False"}},
+            "queue_id": {"openbis_code": "CLUSTER_JOBID"},
+            "job_starttime": {"openbis_code": "TEMP_JOB_START_DATE"},
+            "job_stoptime": {"openbis_code": "TEMP_JOB_END_DATE"},
+            "job_status": {"openbis_code": "TEMP_STATUS", "terms": 
+                            {"aborted": "ABORTED", "created": "CREATED", "finished": "FINISHED", 
+                            "initialized": "INITIALIZED", "running": "RUNNING", "submitted": "SUBMITTED"}},
+            "energy_cutoff": {"openbis_code": "xx", "unit": "eV"},
+            "kpoint_Monkhorst_Pack": {"openbis_code": "xx"},
+            "xc_functional": {"openbis_code": "xx"},
+            "TotalVolume": {"openbis_code": "TEMP_TOTAL_VOLUME", "unit": "ANGSTROM3"},
+            "TotalEnergy": {"openbis_code": "TEMP_TOTAL_ENERGY", "unit": "EV"}
         }
 }
