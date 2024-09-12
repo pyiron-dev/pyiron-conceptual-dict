@@ -48,7 +48,7 @@ def identify_method(job, method_dict):
     vals = indf['data_dict']['Value']
     mlist = []
     for p,v in zip(params, vals):
-        mlist.append(p + '=' + v)
+        mlist.append(p + '=' + str(v))
     mstring = ';'.join(mlist)
     raw = mstring.split(';')
     mdict = {}
